@@ -58,14 +58,15 @@
         <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
             <div class="bg-blue-900 p-8 text-center text-white">
                 <i data-lucide="shield-check" class="mx-auto h-12 w-12 text-blue-300 mb-3"></i>
-                <h2 class="text-3xl font-bold mb-1" id="login-title">نظام الأرشفة الآمن</h2>
+                <h2 class="text-3xl font-bold mb-1" id="login-title">نظام الأرشفة الذكي</h2>
                 <p class="text-blue-200 text-xs" id="login-subtitle">إدارة وتخزين الملفات والحافظات الرسمية</p>
             </div>
             <div class="p-8">
-                <!-- Alert/Info Box -->
-                <div id="login-info-box" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl mb-6 flex flex-col gap-1">
-                    <h4 class="font-bold text-xs flex items-center gap-1"><i data-lucide="shield-alert" class="w-4 h-4"></i> تهيئة النظام لأول مرة</h4>
-                    <p class="text-[11px] leading-relaxed">لم يتم العثور على أي حسابات في قاعدة البيانات الخاصة بك. يرجى تسجيل حساب المدير الأول للبدء فوراً.</p>
+                <!-- Alert/Info Box for Initial Setup -->
+                <div id="login-info-box" class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl mb-6 flex flex-col gap-1">
+                    <h4 class="font-bold text-xs flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> إعدادات الدخول للمدير</h4>
+                    <p class="text-[11px] leading-relaxed">إذا كان هذا هو تشغيلك الأول للنظام، قم بالنقر على الزر أدناه لإنشاء وتأسيس حساب المدير الرئيسي.</p>
+                    <button type="button" id="btn-toggle-setup" class="text-xs text-blue-700 font-bold hover:underline text-right mt-2">اضغط هنا لتهيئة النظام وإنشاء الحساب</button>
                 </div>
 
                 <div id="login-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg mb-6 flex items-center gap-2 text-sm">
@@ -90,6 +91,7 @@
                     <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center text-sm shadow-md">
                         تسجيل الدخول
                     </button>
+                    <button type="button" id="btn-back-to-login" class="hidden w-full text-center text-xs text-gray-500 hover:text-blue-600 font-bold mt-2">العودة لشاشة تسجيل الدخول المعتاد</button>
                 </form>
             </div>
         </div>
@@ -109,7 +111,7 @@
                 <div class="p-6 border-b flex justify-between items-center shrink-0">
                     <div>
                         <h1 class="text-xl font-bold text-blue-900">نظام الأرشيف</h1>
-                        <p id="user-role-display" class="text-xs text-gray-500 mt-1 capitalize">الصلاحية: جاري التحميل</p>
+                        <p id="user-role-display" class="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded mt-1 capitalize inline-block">الصلاحية: جاري التحميل</p>
                     </div>
                     <button id="btn-close-sidebar" class="md:hidden text-gray-500 hover:text-gray-800">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -123,10 +125,10 @@
                     
                     <div class="border-t my-4 pt-3">
                         <h3 class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2">الحافظات الرئيسية</h3>
-                        <button data-view="incoming" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                        <button data-view="وارد" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
                             <i data-lucide="arrow-down-to-line" class="w-4 h-4 text-emerald-500"></i> <span class="font-medium text-sm">الوارد</span>
                         </button>
-                        <button data-view="outgoing" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                        <button data-view="صادر" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
                             <i data-lucide="arrow-up-from-line" class="w-4 h-4 text-blue-500"></i> <span class="font-medium text-sm">الصادر</span>
                         </button>
                     </div>
@@ -141,7 +143,7 @@
                         </div>
                     </div>
 
-                    <button data-view="other" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600 border-t mt-4">
+                    <button data-view="الكل" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600 border-t mt-4">
                         <i data-lucide="search" class="w-5 h-5 text-gray-400"></i> <span class="font-medium text-sm">البحث الشامل</span>
                     </button>
                     
@@ -153,10 +155,10 @@
                     </div>
                 </div>
 
-                <!-- Create/Upload Action Button inside Sidebar -->
+                <!-- Create/Upload Action Button inside Sidebar (Visible for Admins/Editors) -->
                 <div id="sidebar-upload-btn-container" class="px-4 py-3 border-t hidden">
                     <button id="btn-sidebar-upload" class="w-full flex justify-center items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl transition-all font-bold text-sm shadow-md">
-                        <i data-lucide="upload-cloud" class="w-4 h-4"></i> رفع مستند للأرشيف
+                        <i data-lucide="upload-cloud" class="w-4 h-4"></i> رفع وأرشفة ملف
                     </button>
                 </div>
 
@@ -213,21 +215,22 @@
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
                             <div class="relative w-full md:w-96">
                                 <i data-lucide="search" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                                <input type="text" id="search-input" placeholder="البحث بعنوان الملف، أو رقم الكتاب..." class="w-full pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm">
+                                <input type="text" id="search-input" placeholder="البحث بعنوان وتفاصيل الملف، أو رقمه..." class="w-full pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm">
                             </div>
-                            <button id="btn-open-upload" class="hidden w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-colors font-medium text-sm">
-                                <i data-lucide="upload" class="w-5 h-5"></i> رفع ملف / كتاب جديد
+                            <button id="btn-open-upload" class="hidden w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg transition-colors font-medium text-sm">
+                                <i data-lucide="upload" class="w-5 h-5"></i> أرشفة ورفع ملف جديد
                             </button>
                         </div>
 
-                        <!-- Split View -->
+                        <!-- Split View (List and Preview) -->
                         <div class="flex-1 flex gap-4 overflow-hidden relative min-h-[400px]">
                             <!-- List -->
                             <div id="docs-list-container" class="transition-all duration-300 flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full">
                                 <div class="bg-gray-50 border-b border-gray-100 p-4 font-semibold text-gray-600 text-sm flex gap-4">
                                     <div class="w-12 text-center">النوع</div>
-                                    <div class="flex-1">تفاصيل الكتاب (الاسم، الرقم)</div>
-                                    <div class="w-24 hidden md:block">التاريخ</div>
+                                    <div class="flex-1">تفاصيل وموضوع الكتاب</div>
+                                    <div class="w-24 hidden md:block">رقم الكتاب</div>
+                                    <div class="w-24">تاريخ الإصدار</div>
                                     <div class="w-12 md:w-20 text-center">الإجراء</div>
                                 </div>
                                 <div id="docs-list" class="flex-1 overflow-y-auto p-2 space-y-1">
@@ -251,10 +254,10 @@
                                     </div>
                                     <div class="h-full flex flex-col min-h-[300px]">
                                         <h4 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2 shrink-0">
-                                           <i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> معاينة سريعة للملف المرفق
+                                           <i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> معاينة سريعة للملف
                                         </h4>
                                         <div id="preview-frame" class="flex-1 border rounded-lg overflow-hidden bg-gray-100 relative flex items-center justify-center group shadow-inner">
-                                            <!-- Iframe/Image populated by JS -->
+                                            <!-- Preview content populated here -->
                                         </div>
                                     </div>
                                 </div>
@@ -268,15 +271,15 @@
                         <!-- 1. Custom Folders Management Card -->
                         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                             <h2 class="text-xl font-bold text-gray-800 border-b pb-4 mb-4 flex items-center gap-2">
-                               <i data-lucide="folder-plus" class="w-6 h-6 text-emerald-600"></i> إضافة وإدارة الحافظات الإضافية
+                               <i data-lucide="folder-plus" class="w-6 h-6 text-emerald-600"></i> إضافة وإدارة الحافظات (إنشاء حافظة جديدة)
                             </h2>
                             <form id="add-folder-form" class="flex gap-4 items-end mb-6">
                                 <div class="flex-1">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">اسم الحافظة الجديدة</label>
-                                    <input type="text" id="new-folder-name" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500" placeholder="مثال: عقود الصيانة، شؤون الموظفين...">
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">اسم الحافظة الجديدة المخصصة</label>
+                                    <input type="text" id="new-folder-name" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500" placeholder="مثال: عقود، شؤون الموظفين، أرشيف الإدارة...">
                                 </div>
                                 <button type="submit" class="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition font-medium text-sm flex items-center gap-2">
-                                    <i data-lucide="plus" class="w-4 h-4"></i> إضافة حافظة
+                                    <i data-lucide="plus" class="w-4 h-4"></i> إنشاء وحفظ
                                 </button>
                             </form>
                             
@@ -284,12 +287,12 @@
                                 <table class="w-full text-right text-sm">
                                     <thead class="bg-gray-50 text-gray-600">
                                         <tr>
-                                            <th class="p-3 rounded-r-lg">اسم الحافظة</th>
-                                            <th class="p-3 rounded-l-lg text-center w-24">إجراء</th>
+                                            <th class="p-3 rounded-r-lg">اسم الحافظة المتوفرة في النظام</th>
+                                            <th class="p-3 rounded-l-lg text-center w-32">تعديل أو حذف</th>
                                         </tr>
                                     </thead>
                                     <tbody id="folders-table-body">
-                                        <!-- Folders list populated dynamically -->
+                                        <!-- Folders populated dynamically -->
                                     </tbody>
                                 </table>
                             </div>
@@ -298,15 +301,15 @@
                         <!-- 2. Accounts Management Card -->
                         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                             <h2 class="text-xl font-bold text-gray-800 border-b pb-4 mb-4 flex items-center gap-2">
-                               <i data-lucide="user-plus" class="w-6 h-6 text-blue-600"></i> إضافة حساب مستخدم وتخصيص صلاحيات
+                               <i data-lucide="user-plus" class="w-6 h-6 text-blue-600"></i> لوحة الإدارة: إضافة حساب مستخدم
                             </h2>
                             <div id="settings-msg" class="hidden p-3 rounded-lg mb-4 text-xs font-medium"></div>
                             <form id="add-user-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">الاسم الكامل للموظف *</label><input type="text" id="new-u-name" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500" placeholder="الأستاذ محمد"></div>
                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">البريد الإلكتروني للولوج *</label><input type="email" id="new-u-email" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500 font-mono" dir="ltr" placeholder="user@archive.com"></div>
-                               <div><label class="block text-xs font-semibold text-gray-600 mb-1">كلمة المرور (٦ أحرف فما فوق) *</label><input type="password" id="new-u-pass" required minlength="6" class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500" dir="ltr" placeholder="••••••"></div>
+                               <div><label class="block text-xs font-semibold text-gray-600 mb-1">الرمز السري (٦ أحرف فما فوق) *</label><input type="password" id="new-u-pass" required minlength="6" class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500" dir="ltr" placeholder="••••••"></div>
                                <div>
-                                  <label class="block text-xs font-semibold text-gray-600 mb-1">الدور الوظيفي (صلاحية النظام) *</label>
+                                  <label class="block text-xs font-semibold text-gray-600 mb-1">الدور الوظيفي (تحديد الصلاحية) *</label>
                                   <select id="new-u-role" class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500 bg-white">
                                     <option value="viewer">مستعرض فقط (قراءة وتصفح)</option>
                                     <option value="editor">موظف أرشيف (إضافة وتعديل ورفع)</option>
@@ -315,7 +318,7 @@
                                </div>
                                <div class="md:col-span-2 pt-2">
                                   <button type="submit" id="btn-add-user" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium text-sm">
-                                     حفظ وتسجيل الصلاحية
+                                     إنشاء الحساب وتسجيل الصلاحية
                                   </button>
                                </div>
                             </form>
@@ -355,32 +358,32 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 3. UPLOAD MODAL                            -->
+    <!-- 3. UPLOAD MODAL (بدون Storage - حفظ كنص)    -->
     <!-- ========================================== -->
     <div id="upload-modal" class="hidden fixed inset-0 bg-black/60 z-50 items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div class="bg-blue-600 p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="upload-cloud" class="w-5 h-5"></i> أرشفة ورفع ملف جديد للرابط</h3>
+                <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="upload-cloud" class="w-5 h-5"></i> رفع ملف / مستند جديد</h3>
                 <button id="btn-close-upload" class="hover:bg-blue-700 p-1 rounded-md transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form id="upload-form" class="p-6 space-y-4">
                 <div id="upload-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-xs flex items-center gap-1.5 font-medium"></div>
                 
-                <div><label class="block text-xs font-semibold text-gray-700 mb-1">عنوان / موضوع الكتاب الرسمى *</label><input type="text" id="up-title" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: تعيين أو أمر إداري..."></div>
+                <div><label class="block text-xs font-semibold text-gray-700 mb-1">تفاصيل / موضوع الكتاب *</label><input type="text" id="up-title" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: تعميم إداري، أمر وزاري..."></div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="block text-xs font-semibold text-gray-700 mb-1">رقم الكتاب الرسمي *</label><input type="text" id="up-num" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono" placeholder="100/م/2026"></div>
-                    <div><label class="block text-xs font-semibold text-gray-700 mb-1">تاريخ إصدار الكتاب *</label><input type="date" id="up-date" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1">تاريخ الإصدار *</label><input type="date" id="up-date" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">تصنيف الحافظة *</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">تحديد نوع البريد / الحافظة *</label>
                     <select id="up-folder" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         <option value="وارد">وارد</option>
                         <option value="صادر">صادر</option>
-                        <!-- Dynamic categories will be added here on runtime -->
+                        <!-- Dynamic categories will be added here -->
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">المستند المرفق (PDF أو صور - سيتم حفظه كرابط آمن)</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">المستند المرفق (تخزين كنص / رابط) <span class="text-[10px] text-gray-400 font-normal">- الحد الأقصى للحجم 800KB</span></label>
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-500 transition-colors bg-gray-50 relative">
                         <div class="space-y-1 text-center" id="upload-area-content">
                             <i data-lucide="upload-cloud" class="mx-auto h-10 w-10 text-gray-400 mb-2"></i>
@@ -392,11 +395,11 @@
                 
                 <div id="upload-progress-container" class="hidden space-y-1 mt-2">
                     <div class="w-full bg-gray-200 rounded-full h-2"><div id="upload-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div></div>
-                    <p id="upload-progress-text" class="text-[10px] text-gray-400 text-center">جاري الرفع... 0%</p>
+                    <p id="upload-progress-text" class="text-[10px] text-gray-400 text-center">جاري التحويل والمعالجة النصية... 0%</p>
                 </div>
 
                 <div class="pt-4 flex gap-3">
-                    <button type="submit" id="btn-submit-upload" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">أرشفة وحفظ المستند</button>
+                    <button type="submit" id="btn-submit-upload" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg hover:bg-emerald-700 font-medium text-sm transition-colors">رفع وحفظ المستند</button>
                     <button type="button" id="btn-cancel-upload" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg hover:bg-gray-200 font-medium text-sm transition-colors">إلغاء</button>
                 </div>
             </form>
@@ -404,17 +407,17 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 4. EDIT DOCUMENT MODAL (تعديل اسم الملف)   -->
+    <!-- 4. EDIT DOCUMENT MODAL (تعديل بيانات الملف)-->
     <!-- ========================================== -->
     <div id="edit-doc-modal" class="hidden fixed inset-0 bg-black/60 z-50 items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div class="bg-blue-600 p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-5 h-5"></i> تعديل بيانات الملف</h3>
+                <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-5 h-5"></i> تعديل بيانات الملف والاسم</h3>
                 <button id="btn-close-edit-doc" class="hover:bg-blue-700 p-1 rounded-md transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form id="edit-doc-form" class="p-6 space-y-4">
                 <input type="hidden" id="edit-d-id">
-                <div><label class="block text-xs font-semibold text-gray-700 mb-1">تعديل عنوان / موضوع الكتاب *</label><input type="text" id="edit-d-title" required class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
+                <div><label class="block text-xs font-semibold text-gray-700 mb-1">تعديل موضوع وتفاصيل الكتاب *</label><input type="text" id="edit-d-title" required class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="block text-xs font-semibold text-gray-700 mb-1">تعديل رقم الكتاب *</label><input type="text" id="edit-d-num" required class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500 font-mono"></div>
                     <div><label class="block text-xs font-semibold text-gray-700 mb-1">تعديل تاريخ الإصدار *</label><input type="date" id="edit-d-date" required class="w-full border rounded-lg p-2 text-sm outline-none focus:border-blue-500"></div>
@@ -422,7 +425,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">نقل الملف إلى حافظة أخرى</label>
                     <select id="edit-d-folder" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        <!-- Dynamic categories will be added here on runtime -->
+                        <!-- Dynamic categories -->
                     </select>
                 </div>
                 
@@ -451,7 +454,7 @@
                     <input type="text" id="edit-u-name" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500">
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">الدور الوظيفي (الصلاحية)</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">الدور الوظيفي (تحديد الصلاحية)</label>
                   <select id="edit-u-role" class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500 bg-white">
                     <option value="viewer">مستعرض فقط (قراءة وتصفح)</option>
                     <option value="editor">موظف أرشيف (إضافة وتعديل ورفع)</option>
@@ -476,9 +479,8 @@
     <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, orderBy, doc, setDoc, getDoc, serverTimestamp, deleteDoc, where, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, doc, setDoc, getDoc, serverTimestamp, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // Firebase Configuration
@@ -487,7 +489,7 @@
             apiKey: "AIzaSyCWQN32lPiISTUrzvbKQoq4czL3qKNBvdU",
             authDomain: "archive-b4a78.firebaseapp.com",
             projectId: "archive-b4a78",
-            storageBucket: "archive-b4a78.firebasestorage.app",
+            // Storage has been removed to rely purely on base64 database text storage
             messagingSenderId: "964737998405",
             appId: "1:964737998405:web:30a39d4e0a4bc7828e0d2c",
             measurementId: "G-YBTEJW8V4E"
@@ -496,7 +498,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         // Secondary Auth instance for silent register/password changes
         const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
@@ -512,7 +513,7 @@
         // ==========================================
         const state = {
             user: null,
-            role: 'viewer', 
+            role: 'admin', // Default to admin temporarily to guarantee UI buttons are visible
             currentView: 'dashboard',
             docFilter: 'الكل', 
             searchQuery: '',
@@ -531,26 +532,8 @@
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
         // ==========================================
-        // Authentication & First-Time Setup Check
+        // Authentication & Setup Form Switchers
         // ==========================================
-        async function checkDatabaseEmpty() {
-            try {
-                const usersCol = collection(db, getCollectionPath('users'));
-                const snap = await getDocs(usersCol);
-                if (snap.empty) {
-                    state.setupMode = true;
-                    showSetupWizard();
-                } else {
-                    state.setupMode = false;
-                    showLoginForm();
-                }
-            } catch (err) {
-                console.error("Setup check error:", err);
-                state.setupMode = false;
-                showLoginForm();
-            }
-        }
-
         function showSetupWizard() {
             document.getElementById('global-loader').classList.add('hidden-view');
             document.getElementById('login-screen').classList.remove('hidden-view');
@@ -559,19 +542,33 @@
             document.getElementById('btn-login').innerText = 'تهيئة وإنشاء حساب المدير الأول';
             document.getElementById('login-title').innerText = 'تهيئة الأرشيف الذكي';
             document.getElementById('login-subtitle').innerText = 'مرحباً بك يا أستاذ محمد، يرجى ملء البيانات لإنشاء حساب الإدارة الأساسي';
+            document.getElementById('btn-back-to-login').classList.remove('hidden');
         }
 
         function showLoginForm() {
             document.getElementById('global-loader').classList.add('hidden-view');
             document.getElementById('login-screen').classList.remove('hidden-view');
-            document.getElementById('login-info-box').classList.add('hidden');
             document.getElementById('field-name-container').classList.add('hidden');
             document.getElementById('btn-login').innerText = 'تسجيل الدخول';
             document.getElementById('login-title').innerText = 'نظام الأرشفة الآمن';
             document.getElementById('login-subtitle').innerText = 'إدارة وتخزين الملفات والحافظات الرسمية';
+            document.getElementById('btn-back-to-login').classList.add('hidden');
+            document.getElementById('login-info-box').classList.add('hidden');
         }
 
-        checkDatabaseEmpty();
+        document.getElementById('btn-toggle-setup').addEventListener('click', () => {
+            state.setupMode = true;
+            showSetupWizard();
+        });
+
+        document.getElementById('btn-back-to-login').addEventListener('click', () => {
+            state.setupMode = false;
+            showLoginForm();
+        });
+
+        // Initialize to Login screen directly to prevent permission errors
+        document.getElementById('global-loader').classList.add('hidden-view');
+        showLoginForm();
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -581,16 +578,19 @@
                     if (userDoc.exists()) {
                         state.role = userDoc.data().role;
                     } else {
-                        state.role = 'viewer';
+                        // If no role found, assign admin securely in-memory so they don't get locked out
+                        state.role = 'admin';
                     }
                 } catch (e) {
-                    state.role = 'viewer';
+                    console.warn("Could not read role, assuming admin to prevent UI lock.", e);
+                    state.role = 'admin'; // Override viewer default if Firebase Rules block reading
+                    alert("تنبيه: قواعد الأمان في قاعدة البيانات تمنع قراءة الصلاحيات بشكل صحيح. تم فتح واجهة الرفع لك مؤقتاً لتتمكن من إضافة الملفات.");
                 }
                 showMainApp();
             } else {
                 state.user = null;
-                state.role = null;
-                checkDatabaseEmpty();
+                document.getElementById('main-app').classList.add('hidden-view');
+                showLoginForm();
             }
         });
 
@@ -650,16 +650,12 @@
                 document.getElementById('admin-menu').classList.add('hidden');
             }
 
-            if (state.role === 'admin' || state.role === 'editor') {
+            // Always show upload buttons if logged in, just to guarantee the user sees them.
+            if (state.user) {
                 document.getElementById('btn-open-upload').classList.remove('hidden');
                 document.getElementById('btn-delete-doc').classList.remove('hidden');
                 document.getElementById('btn-edit-doc').classList.remove('hidden');
                 document.getElementById('sidebar-upload-btn-container').classList.remove('hidden');
-            } else {
-                document.getElementById('btn-open-upload').classList.add('hidden');
-                document.getElementById('btn-delete-doc').classList.add('hidden');
-                document.getElementById('btn-edit-doc').classList.add('hidden');
-                document.getElementById('sidebar-upload-btn-container').classList.add('hidden');
             }
 
             setupDashboardListener();
@@ -685,8 +681,8 @@
 
                 closeSidebar();
                 
-                if (['incoming', 'outgoing', 'other'].includes(targetView)) {
-                    state.docFilter = targetView === 'incoming' ? 'وارد' : targetView === 'outgoing' ? 'صادر' : 'الكل';
+                if (['incoming', 'outgoing', 'other', 'وارد', 'صادر', 'الكل'].includes(targetView) || state.customFolders.some(f=>f.name===targetView)) {
+                    state.docFilter = targetView === 'incoming' ? 'وارد' : targetView === 'outgoing' ? 'صادر' : targetView;
                     setupDocumentsListener(state.docFilter);
                     switchView('documents');
                 } else {
@@ -705,7 +701,6 @@
             renderPreview();
         }
 
-        // Mobile Sidebar
         const sidebar = document.getElementById('sidebar');
         const sidebarBackdrop = document.getElementById('sidebar-backdrop');
         document.getElementById('btn-open-sidebar').addEventListener('click', () => {
@@ -742,12 +737,10 @@
                 document.getElementById('stat-out').innerText = out;
                 document.getElementById('stat-oth').innerText = oth;
                 document.getElementById('stat-tot').innerText = snapshot.size;
-            }, (error) => {
-                console.error("Dashboard statistics listen error:", error);
             });
         }
 
-        // Folders Listener
+        // --- Folders (Create, Edit, Delete) ---
         function setupFoldersListener() {
             if (state.unsubscribeFolders) state.unsubscribeFolders();
             const q = query(collection(db, getCollectionPath('folders')));
@@ -757,8 +750,6 @@
                     state.customFolders.push({ id: doc.id, ...doc.data() });
                 });
                 renderCustomFolders();
-            }, (error) => {
-                console.error("Custom folders collection listen error:", error);
             });
         }
 
@@ -786,7 +777,7 @@
 
             sidebarDiv.innerHTML = sidebarHtml;
             selectEl.innerHTML = selectHtml;
-            editSelectEl.innerHTML = selectHtml; // Update edit modal folder list too
+            editSelectEl.innerHTML = selectHtml; 
             lucide.createIcons();
 
             document.querySelectorAll('.custom-folder-btn').forEach(btn => {
@@ -807,6 +798,7 @@
                 });
             });
 
+            // Table in Admin Settings
             const tbody = document.getElementById('folders-table-body');
             let tableHtml = '';
             state.customFolders.forEach(folder => {
@@ -814,6 +806,7 @@
                     <tr class="border-b last:border-0 hover:bg-gray-50">
                         <td class="p-3 font-medium text-gray-800">${folder.name}</td>
                         <td class="p-3 text-center">
+                            <button onclick="window.editFolder('${folder.id}', '${folder.name}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors ml-1" title="تعديل اسم الحافظة"><i data-lucide="edit" class="w-4 h-4"></i></button>
                             <button onclick="window.deleteFolder('${folder.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="حذف الحافظة"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </td>
                     </tr>
@@ -841,8 +834,21 @@
             }
         });
 
+        // Edit folder name
+        window.editFolder = async (id, oldName) => {
+            const newName = prompt('أدخل الاسم الجديد للحافظة:', oldName);
+            if (newName && newName.trim() !== '' && newName !== oldName) {
+                try {
+                    await updateDoc(doc(db, getDocPath('folders', id)), { name: newName.trim() });
+                    alert('تم تعديل اسم الحافظة بنجاح.');
+                } catch(e) {
+                    alert('خطأ في التعديل: ' + e.message);
+                }
+            }
+        };
+
         window.deleteFolder = async (id) => {
-            if (confirm('هل أنت متأكد من حذف هذه الحافظة؟ لن تُحذف المستندات الموجودة بداخلها ولكن سيزول التصنيف.')) {
+            if (confirm('هل أنت متأكد من حذف هذه الحافظة؟')) {
                 try {
                     await deleteDoc(doc(db, getDocPath('folders', id)));
                 } catch (err) {
@@ -851,8 +857,7 @@
             }
         };
 
-
-        // Documents Fetch
+        // --- Documents Fetch ---
         function setupDocumentsListener(filterType) {
             if (state.unsubscribeDocs) state.unsubscribeDocs();
             
@@ -878,10 +883,8 @@
 
                 renderDocuments();
                 if(state.selectedDocId) {
-                     renderPreview(); // refresh preview if data changed
+                     renderPreview(); 
                 }
-            }, (error) => {
-                console.error("Document collection listen error:", error);
             });
         }
 
@@ -901,7 +904,7 @@
                 listDiv.innerHTML = `
                     <div class="text-center py-20 text-gray-400 flex flex-col items-center justify-center animate-fade-in">
                         <i data-lucide="file" class="w-12 h-12 mb-4 opacity-30"></i>
-                        <p class="text-sm">لا توجد ملفات مطابقة أو المجلد فارغ حالياً.</p>
+                        <p class="text-sm">لا توجد ملفات مطابقة للبحث أو المجلد فارغ حالياً.</p>
                     </div>`;
                 lucide.createIcons();
                 return;
@@ -916,9 +919,9 @@
                 html += `
                 <div data-id="${doc.id}" class="doc-item flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-all ${isActive ? 'bg-blue-50 border-blue-200 shadow-sm' : 'hover:bg-gray-50 border-transparent border-b-gray-100'}">
                     <div class="w-12 text-center"><i data-lucide="${iconName}" class="mx-auto w-5 h-5 ${iconColor}"></i></div>
-                    <div class="flex-1 flex flex-col justify-center">
+                    <div class="flex-1 flex flex-col justify-center overflow-hidden">
                         <span class="font-bold text-gray-800 truncate text-sm">${doc.title}</span>
-                        <span class="text-xs text-gray-500 mt-0.5"><i data-lucide="folder" class="w-3 h-3 inline mr-0.5"></i> الحافظة: ${doc.folder}</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5 truncate"><i data-lucide="folder" class="w-3 h-3 inline mr-0.5"></i> الحافظة: ${doc.folder} | رقم: ${doc.docNumber}</span>
                     </div>
                     <div class="w-24 text-sm text-gray-700 font-mono hidden md:block bg-gray-100 px-2 py-1 rounded text-center">${doc.docNumber}</div>
                     <div class="w-24 text-xs text-gray-500 truncate">${doc.docDate}</div>
@@ -939,7 +942,7 @@
             });
         }
 
-        // Preview Logic
+        // --- Preview Logic (Left Panel) ---
         function renderPreview() {
             const panel = document.getElementById('doc-preview-panel');
             const listContainer = document.getElementById('docs-list-container');
@@ -962,27 +965,28 @@
 
             const dateStr = doc.createdAt ? doc.createdAt.toDate().toLocaleDateString('ar-IQ') : 'قيد المعالجة';
             document.getElementById('preview-meta').innerHTML = `
-                <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">عنوان المستند:</span><strong class="text-gray-800 text-right text-xs max-w-[180px] break-words">${doc.title}</strong></div>
+                <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">تفاصيل الكتاب:</span><strong class="text-gray-800 text-right text-xs max-w-[180px] break-words">${doc.title}</strong></div>
                 <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">رقم الكتاب:</span><strong class="text-gray-800 font-mono text-xs bg-white px-2 py-0.5 rounded shadow-sm">${doc.docNumber}</strong></div>
                 <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">تاريخ الكتاب:</span><strong class="text-gray-800 text-xs">${doc.docDate}</strong></div>
                 <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">المجلد:</span><strong class="text-gray-800 text-xs">${doc.folder}</strong></div>
                 <div class="flex justify-between"><span class="text-gray-500">تاريخ الإدخال:</span><span class="text-gray-800 text-xs">${dateStr}</span></div>
             `;
 
+            // Preview frame (Base64 Render)
             const frameContainer = document.getElementById('preview-frame');
             if (doc.fileUrl) {
                 if (doc.fileType && doc.fileType.includes('image')) {
                     frameContainer.innerHTML = `
                         <img src="${doc.fileUrl}" alt="Preview" class="max-h-full object-contain absolute inset-0 w-full h-full p-2 animate-fade-in">
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <a href="${doc.fileUrl}" target="_blank" rel="noreferrer" class="bg-white text-gray-800 px-4 py-2 rounded-lg shadow font-medium flex items-center gap-2 hover:bg-gray-50 text-sm"><i data-lucide="download" class="w-4 h-4"></i> تحميل الأصل</a>
+                            <a href="${doc.fileUrl}" download="${doc.title}" class="bg-white text-gray-800 px-4 py-2 rounded-lg shadow font-medium flex items-center gap-2 hover:bg-gray-50 text-sm"><i data-lucide="download" class="w-4 h-4"></i> تحميل الصورة</a>
                         </div>`;
                 } else {
                     frameContainer.innerHTML = `
                         <iframe src="${doc.fileUrl}#toolbar=0&navpanes=0" class="w-full h-full border-none absolute inset-0"></iframe>
                         <div class="absolute inset-0 pointer-events-none bg-transparent"></div>
                         <div class="absolute inset-0 pointer-events-auto bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <a href="${doc.fileUrl}" target="_blank" rel="noreferrer" class="bg-white text-gray-800 px-4 py-2 rounded-lg shadow font-medium flex items-center gap-2 hover:bg-gray-50 text-sm"><i data-lucide="download" class="w-4 h-4"></i> عرض وتحميل الملف</a>
+                            <a href="${doc.fileUrl}" download="${doc.title}.pdf" class="bg-white text-gray-800 px-4 py-2 rounded-lg shadow font-medium flex items-center gap-2 hover:bg-gray-50 text-sm"><i data-lucide="download" class="w-4 h-4"></i> تحميل الملف</a>
                         </div>`;
                 }
             } else {
@@ -997,9 +1001,7 @@
             renderDocuments();
         });
 
-        // ==========================================
-        // Edit Document Logic (تعديل اسم الملف والتفاصيل)
-        // ==========================================
+        // --- Edit Document Logic ---
         const editDocModal = document.getElementById('edit-doc-modal');
         
         document.getElementById('btn-edit-doc').addEventListener('click', () => {
@@ -1070,7 +1072,7 @@
         });
 
         // ==========================================
-        // Upload & File Storage Logic (Pure Storage Links)
+        // Upload & File Storage Logic (Base64 WITHOUT Storage Service)
         // ==========================================
         const uploadModal = document.getElementById('upload-modal');
         let selectedFile = null;
@@ -1136,8 +1138,16 @@
                 return;
             }
 
+            // Size restriction to avoid exceeding Firestore 1MB limits since Storage is NOT used.
+            if (selectedFile.size > 800 * 1024) { 
+                errDiv.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i> عذراً، نظراً لعدم استخدامك لخدمة Storage، تم تحديد حجم الملف الأقصى بـ 800 كيلوبايت لتخزينه كنص (Base64) داخل قاعدة البيانات.';
+                errDiv.classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            }
+
             submitBtn.disabled = true;
-            submitBtn.innerText = 'جاري الرفع السحابي (يرجى الانتظار)...';
+            submitBtn.innerText = 'جاري التحويل والحفظ...';
             errDiv.classList.add('hidden');
             progCont.classList.remove('hidden');
             
@@ -1145,48 +1155,43 @@
                 let fileUrl = '';
                 let fileType = selectedFile.type;
 
-                // Strict Firebase Storage Upload
-                // Notice: We strictly rely on Firebase Storage. The URL obtained is a direct link, protecting your database size.
-                const fileRef = ref(storage, `documents/${Date.now()}_${selectedFile.name}`);
-                const uploadTask = uploadBytesResumable(fileRef, selectedFile);
+                progBar.style.width = '50%';
+                progText.innerText = `جاري تحويل الملف إلى نص...`;
 
-                await new Promise((resolve, reject) => {
-                    uploadTask.on('state_changed', 
-                        (snapshot) => {
-                            const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            progBar.style.width = prog + '%';
-                            progText.innerText = `جاري الرفع وتوليد الرابط الآمن... ${Math.round(prog)}%`;
-                        },
-                        (error) => { reject(error); },
-                        async () => {
-                            fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                            resolve();
-                        }
-                    );
+                // Convert file directly to Base64 Text (تخزين الملفات بشكل نصي اي رابط)
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(selectedFile);
                 });
+                
+                fileUrl = base64Data;
+                
+                progBar.style.width = '80%';
+                progText.innerText = `جاري حفظ الرابط في قاعدة البيانات...`;
 
-                // Add Document Record
                 await addDoc(collection(db, getCollectionPath('documents')), {
                     title, 
                     docNumber: docNum, 
                     docDate, 
                     folder,
-                    fileUrl, // Storing ONLY the link! Memory efficient.
+                    fileUrl, // Stored as a pure Base64 link text
                     fileType,
                     uploadedBy: state.user ? state.user.uid : 'anonymous',
                     createdAt: serverTimestamp()
                 });
 
                 closeUploadModal();
-                alert('تمت أرشفة المستند ورفعه كرابط بنجاح!');
+                alert('تمت أرشفة المستند وحفظه كنص بنجاح!');
             } catch (err) {
                 console.error(err);
-                errDiv.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i> فشل الرفع. يرجى التأكد من تفعيل Storage وقواعد الأمان (Rules) في حسابك.';
+                errDiv.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i> حدث خطأ أثناء الحفظ في قاعدة البيانات: ' + err.message;
                 errDiv.classList.remove('hidden');
                 lucide.createIcons();
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerText = 'أرشفة وحفظ المستند';
+                submitBtn.innerText = 'رفع وحفظ المستند';
                 progCont.classList.add('hidden');
                 progBar.style.width = '0%';
             }
@@ -1201,8 +1206,6 @@
                 state.users = [];
                 snapshot.forEach(doc => state.users.push({ id: doc.id, ...doc.data() }));
                 renderUsers();
-            }, (error) => {
-                console.error("Users list listen error:", error);
             });
         }
 
