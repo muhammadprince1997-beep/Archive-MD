@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الأرشفة الإلكتروني</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles & Animations */
+        body { font-family: 'Cairo', sans-serif; background-color: #f9fafb; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Hide elements initially */
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen overflow-hidden">
+
+    <!-- Loading Spinner (Global) -->
+    <div id="global-loader" class="fixed inset-0 bg-gray-50 z-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. LOGIN SCREEN                            -->
+    <!-- ========================================== -->
+    <div id="login-screen" class="hidden-view flex-1 flex items-center justify-center p-4 min-h-[70vh]">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-blue-900 p-8 text-center">
+                <i data-lucide="file-text" class="mx-auto h-12 w-12 text-white mb-4"></i>
+                <h2 class="text-3xl font-bold text-white mb-2">نظام الأرشفة</h2>
+                <p class="text-blue-200 text-sm">أرشفة الكتب الرسمية (وارد وصادر)</p>
+            </div>
+            <div class="p-8">
+                <div id="login-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg mb-6 flex items-center gap-2 text-sm">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span id="login-error-text">فشل تسجيل الدخول.</span>
+                </div>
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">كلمة المرور</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center">
+                        تسجيل الدخول
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN APPLICATION LAYOUT                 -->
+    <!-- ========================================== -->
+    <div id="main-app" class="hidden-view flex-1 flex flex-col h-screen">
+        <div class="flex-1 flex overflow-hidden relative">
+            
+            <!-- Sidebar Backdrop for Mobile -->
+            <div id="sidebar-backdrop" class="fixed inset-0 bg-black/40 z-20 hidden md:hidden"></div>
+
+            <!-- Sidebar -->
+            <aside id="sidebar" class="bg-white shadow-lg w-64 flex flex-col transition-transform duration-300 z-30 absolute md:relative h-full translate-x-full md:translate-x-0 right-0">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <div>
+                        <h1 class="text-xl font-bold text-blue-900">نظام الأرشيف</h1>
+                        <p id="user-role-display" class="text-xs text-gray-500 mt-1 capitalize">الصلاحية: جاري التحميل</p>
+                    </div>
+                    <button id="btn-close-sidebar" class="md:hidden text-gray-500 hover:text-gray-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-4 flex-1 overflow-y-auto" id="nav-menu">
+                    <button data-view="dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all bg-blue-600 text-white shadow-md">
+                        <i data-lucide="home" class="w-5 h-5"></i> <span class="font-medium text-sm">لوحة التحكم</span>
+                    </button>
+                    <button data-view="incoming" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                        <i data-lucide="arrow-down-to-line" class="w-5 h-5"></i> <span class="font-medium text-sm">الوارد</span>
+                    </button>
+                    <button data-view="outgoing" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                        <i data-lucide="arrow-up-from-line" class="w-5 h-5"></i> <span class="font-medium text-sm">الصادر</span>
+                    </button>
+                    <button data-view="other" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                        <i data-lucide="folder-plus" class="w-5 h-5"></i> <span class="font-medium text-sm">واجهة البحث الشامل</span>
+                    </button>
+                    
+                    <div id="admin-menu" class="hidden my-6 border-t pt-4">
+                        <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase mb-2">الإدارة</h3>
+                        <button data-view="settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="settings" class="w-5 h-5"></i> <span class="font-medium text-sm">إعدادات النظام</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 border-t">
+                    <button id="btn-logout" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all font-medium text-sm">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> تسجيل الخروج
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 flex flex-col min-w-0 bg-gray-50/50 relative">
+                <!-- Mobile Header -->
+                <div class="md:hidden bg-white shadow-sm p-4 flex justify-between items-center z-10">
+                    <button id="btn-open-sidebar" class="text-gray-600 hover:text-gray-900">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <h1 class="font-bold text-blue-900 text-lg">نظام الأرشيف</h1>
+                    <div class="w-8"></div>
+                </div>
+
+                <!-- Views Container -->
+                <div class="flex-1 p-4 md:p-6 overflow-y-auto" id="views-container">
+                    
+                    <!-- Dashboard View -->
+                    <div id="view-dashboard" class="space-y-6 animate-fade-in">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">نظرة عامة على البيانات</h2>
+                            <p class="text-sm text-gray-500 mt-1">إحصائيات الملفات المؤرشفة والكتب الصادرة والواردة حالياً.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div class="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-gray-100">
+                                <div class="bg-emerald-500 text-white p-4 rounded-xl"><i data-lucide="arrow-down-to-line" class="w-6 h-6"></i></div>
+                                <div><h3 class="text-gray-500 text-sm font-medium">إجمالي الوارد</h3><p id="stat-inc" class="text-3xl font-bold text-gray-800 mt-1">0</p></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-gray-100">
+                                <div class="bg-blue-500 text-white p-4 rounded-xl"><i data-lucide="arrow-up-from-line" class="w-6 h-6"></i></div>
+                                <div><h3 class="text-gray-500 text-sm font-medium">إجمالي الصادر</h3><p id="stat-out" class="text-3xl font-bold text-gray-800 mt-1">0</p></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-gray-100">
+                                <div class="bg-purple-500 text-white p-4 rounded-xl"><i data-lucide="folder-plus" class="w-6 h-6"></i></div>
+                                <div><h3 class="text-gray-500 text-sm font-medium">حافظات أخرى</h3><p id="stat-oth" class="text-3xl font-bold text-gray-800 mt-1">0</p></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-gray-100">
+                                <div class="bg-gray-800 text-white p-4 rounded-xl"><i data-lucide="file-text" class="w-6 h-6"></i></div>
+                                <div><h3 class="text-gray-500 text-sm font-medium">إجمالي الملفات</h3><p id="stat-tot" class="text-3xl font-bold text-gray-800 mt-1">0</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents Manager View -->
+                    <div id="view-documents" class="hidden-view h-full flex flex-col space-y-4 animate-fade-in">
+                        <!-- Toolbar -->
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div class="relative w-full md:w-96">
+                                <i data-lucide="search" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                                <input type="text" id="search-input" placeholder="البحث بعنوان الملف، أو رقم الكتاب..." class="w-full pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm">
+                            </div>
+                            <button id="btn-open-upload" class="hidden w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-colors font-medium text-sm">
+                                <i data-lucide="plus" class="w-5 h-5"></i> إضافة ملف / كتاب جديد
+                            </button>
+                        </div>
+
+                        <!-- Split View -->
+                        <div class="flex-1 flex gap-4 overflow-hidden relative min-h-[400px]">
+                            <!-- List -->
+                            <div id="docs-list-container" class="transition-all duration-300 flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full">
+                                <div class="bg-gray-50 border-b border-gray-100 p-4 font-semibold text-gray-600 text-sm flex gap-4">
+                                    <div class="w-12 text-center">النوع</div>
+                                    <div class="flex-1">عنوان / موضوع الكتاب</div>
+                                    <div class="w-24 hidden md:block">رقم الكتاب</div>
+                                    <div class="w-24">تاريخ الكتاب</div>
+                                    <div class="w-12 md:w-20 text-center">عرض</div>
+                                </div>
+                                <div id="docs-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                                    <!-- JS populated list -->
+                                </div>
+                            </div>
+
+                            <!-- Preview Panel -->
+                            <div id="doc-preview-panel" class="hidden w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-gray-100 flex-col overflow-hidden animate-fade-in absolute md:relative inset-0 md:inset-auto z-10 md:z-0">
+                                <div class="p-4 border-b bg-gray-50 flex justify-between items-center shrink-0">
+                                    <h3 class="font-bold text-gray-800 text-sm">عرض وتحليل تفاصيل المستند</h3>
+                                    <div class="flex gap-2">
+                                        <button id="btn-delete-doc" class="hidden text-red-500 hover:bg-red-50 p-2 rounded-lg" title="حذف الملف"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button id="btn-close-preview" class="text-gray-500 hover:bg-gray-200 p-2 rounded-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                                <div class="p-4 overflow-y-auto flex-1 space-y-6">
+                                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3 text-xs" id="preview-meta">
+                                        <!-- Metadata populated by JS -->
+                                    </div>
+                                    <div class="h-full flex flex-col min-h-[300px]">
+                                        <h4 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2 shrink-0">
+                                           <i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> معاينة سريعة للملف المرفق
+                                        </h4>
+                                        <div id="preview-frame" class="flex-1 border rounded-lg overflow-hidden bg-gray-100 relative flex items-center justify-center group shadow-inner">
+                                            <!-- Iframe/Image populated by JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings View -->
+                    <div id="view-settings" class="hidden-view max-w-4xl mx-auto space-y-6 animate-fade-in">
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <h2 class="text-xl font-bold text-gray-800 border-b pb-4 mb-4 flex items-center gap-2">
+                               <i data-lucide="user" class="w-6 h-6 text-blue-600"></i> إضافة حساب مستخدم وتخصيص صلاحيات
+                            </h2>
+                            <div id="settings-msg" class="hidden p-3 rounded-lg mb-4 text-xs font-medium"></div>
+                            <form id="add-user-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <div><label class="block text-xs font-semibold text-gray-600 mb-1">الاسم الكامل</label><input type="text" id="new-u-name" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500"></div>
+                               <div><label class="block text-xs font-semibold text-gray-600 mb-1">البريد الإلكتروني للولوج</label><input type="email" id="new-u-email" required class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500 font-mono" dir="ltr"></div>
+                               <div><label class="block text-xs font-semibold text-gray-600 mb-1">كلمة المرور (٦ أحرف فما فوق)</label><input type="password" id="new-u-pass" required minlength="6" class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500" dir="ltr"></div>
+                               <div>
+                                  <label class="block text-xs font-semibold text-gray-600 mb-1">الدور الوظيفي (صلاحية النظام)</label>
+                                  <select id="new-u-role" class="w-full border rounded p-2 text-sm outline-none focus:border-blue-500 bg-white">
+                                    <option value="viewer">مستعرض فقط (قراءة وتصفح)</option>
+                                    <option value="editor">موظف أرشيف (إضافة وتعديل)</option>
+                                    <option value="admin">مدير نظام (جميع الصلاحيات)</option>
+                                  </select>
+                               </div>
+                               <div class="md:col-span-2 pt-2">
+                                  <button type="submit" id="btn-add-user" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+                                     حفظ وتسجيل الصلاحية
+                                  </button>
+                               </div>
+                            </form>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                             <h2 class="text-xl font-bold text-gray-800 border-b pb-4 mb-4">قائمة مستخدمي النظام الحاليين</h2>
+                             <div class="overflow-x-auto">
+                                <table class="w-full text-right text-sm">
+                                   <thead class="bg-gray-50 text-gray-600"><tr><th class="p-3 rounded-r-lg">الاسم الكامل</th><th class="p-3">البريد الإلكتروني</th><th class="p-3">صلاحية الدخول</th><th class="p-3 rounded-l-lg text-center">إجراء</th></tr></thead>
+                                   <tbody id="users-table-body">
+                                      <!-- Users populated by JS -->
+                                   </tbody>
+                                </table>
+                             </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-gray-300 py-4 h-[60px] flex items-center shrink-0 border-t border-gray-800 z-40">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2 text-xs">
+                <div class="font-medium text-gray-400 text-center md:text-right">
+                    حقوق الإعداد والتطوير محفوظة &copy; <span id="current-year"></span>
+                </div>
+                <div class="flex items-center gap-4 bg-gray-800 px-4 py-1.5 rounded-full border border-gray-700">
+                    <span class="font-bold text-white ml-2 border-l border-gray-600 pl-4 text-[10px] sm:text-xs text-center">الاستاذ محمد عبدالرحمن</span>
+                    <a href="https://www.instagram.com/m9h.7d" target="_blank" class="text-pink-400 hover:text-pink-300 transition-transform hover:scale-110 flex items-center gap-1"><i data-lucide="instagram" class="w-4 h-4"></i><span class="hidden sm:inline">Instagram</span></a>
+                    <a href="https://api.whatsapp.com/send/?phone=%2B9647709873200&text&type=phone_number&app_absent=0" target="_blank" class="text-emerald-400 hover:text-emerald-300 transition-transform hover:scale-110 flex items-center gap-1"><i data-lucide="message-circle" class="w-4 h-4"></i><span class="hidden sm:inline">WhatsApp</span></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. UPLOAD MODAL                            -->
+    <!-- ========================================== -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black/60 z-50 items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="bg-blue-600 p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="upload-cloud" class="w-5 h-5"></i> أرشفة كتاب ومستند جديد</h3>
+                <button id="btn-close-upload" class="hover:bg-blue-700 p-1 rounded-md transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="upload-form" class="p-6 space-y-4">
+                <div id="upload-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-xs flex items-center gap-1.5 font-medium"></div>
+                
+                <div><label class="block text-xs font-semibold text-gray-700 mb-1">عنوان / موضوع الكتاب الرسمى *</label><input type="text" id="up-title" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="مثال: تعيين أو أمر إداري..."></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1">رقم الكتاب الرسمي *</label><input type="text" id="up-num" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono" placeholder="100/م/2026"></div>
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1">تاريخ إصدار الكتاب *</label><input type="date" id="up-date" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">تصنيف الحافظة *</label>
+                    <select id="up-folder" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="وارد">وارد</option>
+                        <option value="صادر">صادر</option>
+                        <option value="أخرى">سرية وأخرى</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">المستند المرفق (PDF أو صور)</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-500 transition-colors bg-gray-50 relative">
+                        <div class="space-y-1 text-center" id="upload-area-content">
+                            <i data-lucide="upload-cloud" class="mx-auto h-10 w-10 text-gray-400 mb-2"></i>
+                            <div class="text-xs text-gray-600"><span class="text-blue-600 font-medium">اضغط لاختيار ملف</span> أو اسحب المرفق هنا</div>
+                        </div>
+                        <input type="file" id="up-file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,image/*">
+                    </div>
+                </div>
+                
+                <div id="upload-progress-container" class="hidden space-y-1 mt-2">
+                    <div class="w-full bg-gray-200 rounded-full h-2"><div id="upload-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div></div>
+                    <p id="upload-progress-text" class="text-[10px] text-gray-400 text-center">جاري الرفع... 0%</p>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" id="btn-submit-upload" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">حفظ المستند</button>
+                    <button type="button" id="btn-cancel-upload" class="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg hover:bg-gray-200 font-medium text-sm transition-colors">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC                           -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, orderBy, doc, setDoc, getDoc, serverTimestamp, deleteDoc, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // ==========================================
+        // Firebase Configuration (User Provided)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWQN32lPiISTUrzvbKQoq4czL3qKNBvdU",
+            authDomain: "archive-b4a78.firebaseapp.com",
+            projectId: "archive-b4a78",
+            storageBucket: "archive-b4a78.firebasestorage.app",
+            messagingSenderId: "964737998405",
+            appId: "1:964737998405:web:30a39d4e0a4bc7828e0d2c",
+            measurementId: "G-YBTEJW8V4E"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Secondary App for Admin User Creation
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        // ==========================================
+        // App State
+        // ==========================================
+        const state = {
+            user: null,
+            role: 'viewer', // default
+            currentView: 'dashboard',
+            docFilter: 'الكل', // الكل, وارد, صادر
+            searchQuery: '',
+            documents: [],
+            selectedDocId: null,
+            users: [],
+            unsubscribeDocs: null,
+            unsubscribeUsers: null
+        };
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // ==========================================
+        // Authentication Logic
+        // ==========================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                state.user = user;
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        state.role = userDoc.data().role;
+                    } else {
+                        state.role = 'viewer';
+                    }
+                } catch (e) {
+                    state.role = 'viewer';
+                }
+                showMainApp();
+            } else {
+                state.user = null;
+                state.role = null;
+                showLoginScreen();
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login');
+            const errDiv = document.getElementById('login-error');
+            
+            btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>';
+            btn.disabled = true;
+            errDiv.classList.add('hidden');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                errDiv.classList.remove('hidden');
+                document.getElementById('login-error-text').innerText = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+                btn.innerHTML = 'تسجيل الدخول';
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // ==========================================
+        // Navigation & Views Logic
+        // ==========================================
+        function showLoginScreen() {
+            document.getElementById('global-loader').classList.add('hidden-view');
+            document.getElementById('main-app').classList.add('hidden-view');
+            document.getElementById('login-screen').classList.remove('hidden-view');
+            if(state.unsubscribeDocs) state.unsubscribeDocs();
+            if(state.unsubscribeUsers) state.unsubscribeUsers();
+        }
+
+        function showMainApp() {
+            document.getElementById('global-loader').classList.add('hidden-view');
+            document.getElementById('login-screen').classList.add('hidden-view');
+            document.getElementById('main-app').classList.remove('hidden-view');
+            
+            // Setup Role Based UI
+            const roleName = state.role === 'admin' ? 'مدير النظام' : state.role === 'editor' ? 'موظف أرشيف' : 'مستعرض';
+            document.getElementById('user-role-display').innerText = `الصلاحية: ${roleName}`;
+            
+            if (state.role === 'admin') {
+                document.getElementById('admin-menu').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-menu').classList.add('hidden');
+            }
+
+            if (state.role === 'admin' || state.role === 'editor') {
+                document.getElementById('btn-open-upload').classList.remove('hidden');
+                document.getElementById('btn-delete-doc').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-open-upload').classList.add('hidden');
+                document.getElementById('btn-delete-doc').classList.add('hidden');
+            }
+
+            // Setup Listeners
+            setupDashboardListener();
+            switchView('dashboard');
+            
+            if (state.role === 'admin') {
+                setupUsersListener();
+            }
+        }
+
+        const navBtns = document.querySelectorAll('.nav-btn');
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetView = e.currentTarget.getAttribute('data-view');
+                
+                // Update active state
+                navBtns.forEach(b => {
+                    b.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                    b.classList.add('text-gray-600', 'hover:bg-gray-100', 'hover:text-blue-600');
+                });
+                e.currentTarget.classList.remove('text-gray-600', 'hover:bg-gray-100', 'hover:text-blue-600');
+                e.currentTarget.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+
+                closeSidebar();
+                
+                if (['incoming', 'outgoing', 'other'].includes(targetView)) {
+                    state.docFilter = targetView === 'incoming' ? 'وارد' : targetView === 'outgoing' ? 'صادر' : 'الكل';
+                    setupDocumentsListener(state.docFilter);
+                    switchView('documents');
+                } else {
+                    switchView(targetView);
+                }
+            });
+        });
+
+        function switchView(viewId) {
+            state.currentView = viewId;
+            ['view-dashboard', 'view-documents', 'view-settings'].forEach(id => {
+                document.getElementById(id).classList.add('hidden-view');
+            });
+            document.getElementById(`view-${viewId}`).classList.remove('hidden-view');
+            state.selectedDocId = null;
+            renderPreview();
+        }
+
+        // Mobile Sidebar
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        document.getElementById('btn-open-sidebar').addEventListener('click', () => {
+            sidebar.classList.remove('translate-x-full');
+            sidebarBackdrop.classList.remove('hidden');
+        });
+        function closeSidebar() {
+            sidebar.classList.add('translate-x-full');
+            sidebarBackdrop.classList.add('hidden');
+        }
+        document.getElementById('btn-close-sidebar').addEventListener('click', closeSidebar);
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+
+
+        // ==========================================
+        // Data Listeners & Rendering
+        // ==========================================
+
+        // Dashboard Stats
+        function setupDashboardListener() {
+            const q = query(collection(db, 'documents'));
+            onSnapshot(q, (snapshot) => {
+                let inc = 0, out = 0, oth = 0;
+                snapshot.forEach(doc => {
+                    const f = doc.data().folder;
+                    if (f === 'وارد') inc++;
+                    else if (f === 'صادر') out++;
+                    else oth++;
+                });
+                document.getElementById('stat-inc').innerText = inc;
+                document.getElementById('stat-out').innerText = out;
+                document.getElementById('stat-oth').innerText = oth;
+                document.getElementById('stat-tot').innerText = snapshot.size;
+            });
+        }
+
+        // Documents
+        function setupDocumentsListener(filterType) {
+            if (state.unsubscribeDocs) state.unsubscribeDocs();
+            let q;
+            if (filterType === 'الكل') {
+                q = query(collection(db, 'documents'), orderBy('createdAt', 'desc'));
+            } else {
+                q = query(collection(db, 'documents'), where('folder', '==', filterType), orderBy('createdAt', 'desc'));
+            }
+
+            state.unsubscribeDocs = onSnapshot(q, (snapshot) => {
+                state.documents = [];
+                snapshot.forEach(doc => state.documents.push({ id: doc.id, ...doc.data() }));
+                renderDocuments();
+            });
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            state.searchQuery = e.target.value.toLowerCase();
+            renderDocuments();
+        });
+
+        function renderDocuments() {
+            const listDiv = document.getElementById('docs-list');
+            const filtered = state.documents.filter(d => 
+                (d.title && d.title.toLowerCase().includes(state.searchQuery)) || 
+                (d.docNumber && d.docNumber.toLowerCase().includes(state.searchQuery))
+            );
+
+            if (filtered.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="text-center py-20 text-gray-400 flex flex-col items-center justify-center">
+                        <i data-lucide="file" class="w-12 h-12 mb-4 opacity-30"></i>
+                        <p class="text-sm">لا توجد ملفات مطابقة أو المجلد فارغ حالياً.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(doc => {
+                const isActive = state.selectedDocId === doc.id;
+                const iconName = doc.folder === 'وارد' ? 'arrow-down-to-line' : doc.folder === 'صادر' ? 'arrow-up-from-line' : 'folder-plus';
+                const iconColor = doc.folder === 'وارد' ? 'text-emerald-500' : doc.folder === 'صادر' ? 'text-blue-500' : 'text-purple-500';
+                
+                html += `
+                <div data-id="${doc.id}" class="doc-item flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-all ${isActive ? 'bg-blue-50 border-blue-200 shadow-sm' : 'hover:bg-gray-50 border-transparent border-b-gray-100'}">
+                    <div class="w-12 text-center"><i data-lucide="${iconName}" class="mx-auto w-5 h-5 ${iconColor}"></i></div>
+                    <div class="flex-1 font-medium text-gray-800 truncate text-sm">${doc.title}</div>
+                    <div class="w-24 text-sm text-gray-500 font-mono hidden md:block">${doc.docNumber}</div>
+                    <div class="w-24 text-sm text-gray-500 truncate">${doc.docDate}</div>
+                    <div class="w-12 md:w-20 text-center">
+                        <button class="text-blue-600 hover:bg-blue-100 p-1.5 rounded-full transition-colors inline-block"><i data-lucide="eye" class="w-[18px] h-[18px]"></i></button>
+                    </div>
+                </div>`;
+            });
+            listDiv.innerHTML = html;
+            lucide.createIcons();
+
+            // Add click listeners
+            document.querySelectorAll('.doc-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    state.selectedDocId = el.getAttribute('data-id');
+                    renderDocuments(); // Re-render to update active styling
+                    renderPreview();
+                });
+            });
+        }
+
+        // Preview Logic
+        function renderPreview() {
+            const panel = document.getElementById('doc-preview-panel');
+            const listContainer = document.getElementById('docs-list-container');
+            
+            if (!state.selectedDocId) {
+                panel.classList.add('hidden', 'md:hidden');
+                panel.classList.remove('md:flex');
+                listContainer.classList.remove('md:w-2/3');
+                listContainer.classList.add('w-full');
+                return;
+            }
+
+            const doc = state.documents.find(d => d.id === state.selectedDocId);
+            if(!doc) return;
+
+            panel.classList.remove('hidden');
+            panel.classList.add('flex', 'md:flex');
+            listContainer.classList.remove('w-full');
+            listContainer.classList.add('md:w-2/3');
+
+            // Metadata
+            const dateStr = doc.createdAt ? doc.createdAt.toDate().toLocaleDateString('ar-IQ') : 'قيد المعالجة';
+            document.getElementById('preview-meta').innerHTML = `
+                <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">عنوان المستند:</span><strong class="text-gray-800 text-right text-xs truncate max-w-[150px]">${doc.title}</strong></div>
+                <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">رقم الكتاب:</span><strong class="text-gray-800 font-mono text-xs">${doc.docNumber}</strong></div>
+                <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">تاريخ الكتاب:</span><strong class="text-gray-800 text-xs">${doc.docDate}</strong></div>
+                <div class="flex justify-between border-b border-blue-100 pb-2"><span class="text-gray-500">المجلد:</span><strong class="text-gray-800 text-xs">${doc.folder}</strong></div>
+                <div class="flex justify-between"><span class="text-gray-500">تاريخ الإدخال:</span><span class="text-gray-800 text-xs">${dateStr}</span></div>
+            `;
+
+            // Frame
+            const frameContainer = document.getElementById('preview-frame');
+            if (doc.fileUrl) {
+                if (doc.fileType && doc.fileType.includes('image')) {
+                    frameContainer.innerHTML = `
+                        <img src="${doc.fileUrl}" alt="Preview" class="max-h-full object-contain absolute inset-0 w-full h-full p-2">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <a href="${doc.fileUrl}" target="_blank" rel="noreferrer" class="bg-white text-gray-800 px-4 py-2 rounded-lg shadow font-medium flex items-center gap-2 hover:bg-gray-50 text-sm"><i data-lucide="download" class="w-4 h-4"></i> تحميل الأصل</a>
+                        </div>`;
+                } else {
+                    frameContainer.innerHTML = `
+                        <iframe src="${doc.fileUrl}#toolbar=0&navpanes=0" class="w-full h-full border-none absolute inset-0"></iframe>
+                        <div class="absolute inset-0 pointer-events-none bg-transparent"></div>
+                        <div class="absolute inset-0 pointer-events-auto bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <a href="${doc.fileUrl}" target="_blank" rel="noreferrer" class="bg-white text-gray-800 px-4 py-2 rounded-lg shadow font-medium flex items-center gap-2 hover:bg-gray-50 text-sm"><i data-lucide="download" class="w-4 h-4"></i> تحميل الملف</a>
+                        </div>`;
+                }
+            } else {
+                frameContainer.innerHTML = '<div class="text-gray-400 text-sm border-2 border-dashed border-gray-300 p-6 rounded-lg text-center w-3/4">لا يوجد ملف مرفق متاح لهذا السجل.</div>';
+            }
+            lucide.createIcons();
+        }
+
+        document.getElementById('btn-close-preview').addEventListener('click', () => {
+            state.selectedDocId = null;
+            renderPreview();
+            renderDocuments();
+        });
+
+        document.getElementById('btn-delete-doc').addEventListener('click', async () => {
+            if(!state.selectedDocId) return;
+            if(confirm('هل أنت متأكد من حذف هذا الملف نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                try {
+                    await deleteDoc(doc(db, 'documents', state.selectedDocId));
+                    state.selectedDocId = null;
+                    renderPreview();
+                } catch(err) {
+                    alert('حدث خطأ أثناء الحذف.');
+                }
+            }
+        });
+
+
+        // ==========================================
+        // Upload Logic
+        // ==========================================
+        const uploadModal = document.getElementById('upload-modal');
+        let selectedFile = null;
+
+        document.getElementById('btn-open-upload').addEventListener('click', () => {
+            uploadModal.classList.remove('hidden');
+            uploadModal.classList.add('flex');
+            document.getElementById('upload-form').reset();
+            selectedFile = null;
+            updateFileUI();
+            document.getElementById('up-folder').value = state.docFilter === 'الكل' ? 'وارد' : (state.docFilter === 'أخرى' ? 'أخرى' : state.docFilter);
+        });
+
+        function closeUploadModal() {
+            uploadModal.classList.add('hidden');
+            uploadModal.classList.remove('flex');
+            document.getElementById('upload-error').classList.add('hidden');
+            document.getElementById('upload-progress-container').classList.add('hidden');
+        }
+
+        document.getElementById('btn-close-upload').addEventListener('click', closeUploadModal);
+        document.getElementById('btn-cancel-upload').addEventListener('click', closeUploadModal);
+
+        document.getElementById('up-file').addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                selectedFile = e.target.files[0];
+                updateFileUI();
+            }
+        });
+
+        function updateFileUI() {
+            const area = document.getElementById('upload-area-content');
+            if (selectedFile) {
+                area.innerHTML = `
+                    <div class="flex flex-col items-center text-emerald-600">
+                        <i data-lucide="check-circle" class="mx-auto h-10 w-10 mb-2"></i>
+                        <span class="text-xs font-medium truncate max-w-[200px]">${selectedFile.name}</span>
+                    </div>`;
+            } else {
+                area.innerHTML = `
+                    <i data-lucide="upload-cloud" class="mx-auto h-10 w-10 text-gray-400 mb-2"></i>
+                    <div class="text-xs text-gray-600"><span class="text-blue-600 font-medium">اضغط لاختيار ملف</span> أو اسحب المرفق هنا</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('up-title').value;
+            const docNum = document.getElementById('up-num').value;
+            const docDate = document.getElementById('up-date').value;
+            const folder = document.getElementById('up-folder').value;
+            const errDiv = document.getElementById('upload-error');
+            const submitBtn = document.getElementById('btn-submit-upload');
+            const progCont = document.getElementById('upload-progress-container');
+            const progBar = document.getElementById('upload-progress-bar');
+            const progText = document.getElementById('upload-progress-text');
+
+            if(!title || !docNum || !docDate) {
+                errDiv.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i> يرجى ملء كافة الحقول الأساسية المطلوبة.';
+                errDiv.classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'جاري الأرشفة والرفع...';
+            errDiv.classList.add('hidden');
+            
+            try {
+                let fileUrl = '';
+                let fileType = '';
+
+                if (selectedFile) {
+                    progCont.classList.remove('hidden');
+                    const fileRef = ref(storage, `documents/${Date.now()}_${selectedFile.name}`);
+                    const uploadTask = uploadBytesResumable(fileRef, selectedFile);
+
+                    await new Promise((resolve, reject) => {
+                        uploadTask.on('state_changed', 
+                            (snapshot) => {
+                                const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                progBar.style.width = prog + '%';
+                                progText.innerText = `جاري الرفع... ${Math.round(prog)}%`;
+                            },
+                            (error) => { reject(error); },
+                            async () => {
+                                fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                                fileType = selectedFile.type;
+                                resolve();
+                            }
+                        );
+                    });
+                }
+
+                await addDoc(collection(db, 'documents'), {
+                    title, docNumber: docNum, docDate, folder,
+                    fileUrl, fileType,
+                    uploadedBy: state.user ? state.user.uid : 'anonymous',
+                    createdAt: serverTimestamp()
+                });
+
+                closeUploadModal();
+            } catch (err) {
+                console.error(err);
+                errDiv.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i> حدث خطأ أثناء الحفظ. تأكد من إعدادات Storage.';
+                errDiv.classList.remove('hidden');
+                lucide.createIcons();
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'حفظ المستند';
+                progCont.classList.add('hidden');
+                progBar.style.width = '0%';
+            }
+        });
+
+
+        // ==========================================
+        // Admin Settings Logic
+        // ==========================================
+        function setupUsersListener() {
+            if (state.unsubscribeUsers) return; // already listening
+            state.unsubscribeUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+                state.users = [];
+                snapshot.forEach(doc => state.users.push({ id: doc.id, ...doc.data() }));
+                renderUsers();
+            });
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('users-table-body');
+            let html = '';
+            state.users.forEach(u => {
+                const roleBadge = u.role === 'admin' ? '<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-700">مدير</span>' : 
+                                  u.role === 'editor' ? '<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-700">موظف أرشيف</span>' : 
+                                  '<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-700">مستعرض</span>';
+                
+                html += `
+                <tr class="border-b last:border-0 hover:bg-gray-50">
+                    <td class="p-3 font-medium text-gray-800">${u.name || 'مجهول'}</td>
+                    <td class="p-3 text-gray-600 font-mono text-xs" dir="ltr">${u.email}</td>
+                    <td class="p-3">${roleBadge}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:bg-red-50 p-1 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // Must attach to window to be callable from stringified HTML onclick
+        window.deleteUser = async (id) => {
+            if(confirm('ملاحظة: سيتم حذف صلاحيات المستخدم من قاعدة البيانات فوراً. هل تريد المتابعة؟')) {
+                try {
+                    await deleteDoc(doc(db, 'users', id));
+                } catch (err) {
+                    alert('حدث خطأ أثناء حذف المستخدم.');
+                }
+            }
+        };
+
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('new-u-name').value;
+            const email = document.getElementById('new-u-email').value;
+            const password = document.getElementById('new-u-pass').value;
+            const role = document.getElementById('new-u-role').value;
+            
+            const btn = document.getElementById('btn-add-user');
+            const msgDiv = document.getElementById('settings-msg');
+            
+            btn.disabled = true;
+            btn.innerText = 'جاري إنشاء الحساب...';
+            msgDiv.classList.add('hidden');
+
+            try {
+                // Use secondary app to prevent logging out admin
+                const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                
+                // Add to firestore
+                await setDoc(doc(db, 'users', userCred.user.uid), {
+                    email, name, role, createdAt: serverTimestamp()
+                });
+
+                await signOut(secondaryAuth);
+                
+                msgDiv.innerHTML = 'تم تسجيل وإضافة المستخدم الجديد بنجاح!';
+                msgDiv.className = 'p-3 rounded-lg mb-4 text-xs font-medium bg-emerald-50 text-emerald-700 block';
+                document.getElementById('add-user-form').reset();
+            } catch (err) {
+                console.error(err);
+                msgDiv.innerHTML = 'خطأ: ' + err.message;
+                msgDiv.className = 'p-3 rounded-lg mb-4 text-xs font-medium bg-red-50 text-red-700 block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'حفظ وتسجيل الصلاحية';
+            }
+        });
+
+    </script>
+</body>
+</html>
